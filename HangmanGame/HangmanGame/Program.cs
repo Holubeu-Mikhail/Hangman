@@ -23,7 +23,7 @@ namespace HangmanGame
                 {
                     string choice = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                        .Title("[green]Choose an option[/]:")
+                        .Title("Choose an option:")
                         .AddChoices(new[] {
                             "Start game",
                             "Exit"
@@ -54,9 +54,19 @@ namespace HangmanGame
             var timer = new Stopwatch();
             timer.Start();
             
+            var isEnded = false;
             var word = _words[_random.Next(0, _words.Count - 1)];
-
             var hangmanProcessor = new HangmanProcessor(word);
+
+            while (!isEnded)
+            {
+                var letter = GetLetter();
+                hangmanProcessor.AddLetter(letter);
+
+                hangmanProcessor.PrintCurrentState();
+
+                isEnded = hangmanProcessor.IsGameEnded();
+            }
 
             _words.Remove(word);
             timer.Stop();
@@ -75,6 +85,18 @@ namespace HangmanGame
             }
 
             return words.Select(x => x.Trim().ToLower()).Distinct().ToList();
+        }
+
+        private static char GetLetter()
+        {
+            var input = AnsiConsole.Ask<string>("Enter a [green]letter[/]:");
+
+            while (!Regex.IsMatch(input ?? "", @"^[A-Za-z]{1}$"))
+            {
+                input = AnsiConsole.Ask<string>("[red]Invalid input.[/] Please enter a single latin letter:");
+            }
+
+            return char.ToLower(input[0]);
         }
     }
 }
